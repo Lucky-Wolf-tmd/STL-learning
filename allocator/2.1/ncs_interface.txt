@@ -1,0 +1,40 @@
+according to the standard of STL, follows are the necessary interface of allocator
+
+// the designing reason for follows type, details will be tell in chapter 3
+
+allocator::value_type
+allocator::pointer
+allocator::const_pointer
+allocator::reference
+allocator::const_reference
+allocator::size_type
+allocator::difference_type
+allocator::rebind
+    // this is a nested class template. class rebind<U> possess the only member other, which is a typedef, 
+    // represent to allocator<U>
+allocator::allocator()
+    // default constructor
+allocator::allocator(const allocator&)
+    // copy constructor
+template<class U>allocator::allocator(const allocator<U>&)
+    // generic copy constructor
+allocator::~allocator()
+    // destructor
+pointer allocator::address(reference x)const
+    // return adress of some object. fomulate a.address(x) equal to &x
+const_pointer allocator::address(const_reference x)const
+    // return const adress of some object. fomulate a.address(x) equal to &x
+pointer allocator::allocate(size_type n,const void* = 0)
+    // allocate room, which enough to store n objects in type T.
+    // the second parameter is a reminder, which may be use for increase the locality in implementation,
+    // or ignore it at all.
+void allocator::deallocate(pointer p,size_type n)
+    // give back the room allocated before
+size_type allocator::max_size() const
+    // return the possible maximun size to configure
+void allocator::construct(pointer p,const T& x)
+    // equal to new((void*) p) T(x)
+void allocator::destroy(pointer p)
+    //equal to p->~T()
+
+
