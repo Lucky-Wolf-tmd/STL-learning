@@ -26,7 +26,7 @@ namespace JJ
     template <class T>
     inline void _deallocate(T *buffer)
     {
-         operator delete(buffer);
+         ::operator delete(buffer);
     }
 
     template <class T1, class T2>
