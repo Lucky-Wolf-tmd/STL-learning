@@ -199,114 +199,211 @@ public:
     void deque<T, Alloc, BufSize>::reallocte_map(size_type nodes_to_add,
                                                  bool add_at_front)
     {
-        size_type old_num_nodes = finish.node-start.node+1;
-        size_type new_num_nodes = old_num_nodes+nodes_to_add;
+        size_type old_num_nodes = finish.node - start.node + 1;
+        size_type new_num_nodes = old_num_nodes + nodes_to_add;
 
         map_pointer new_nstart;
-        if(map_size>2*new_num_nodes){
-            new_nstart=map+(map_size-new_num_nodes)/2
-            +(add_at_front?nodes_to_add:0); 
-            if(new_nstart<start.node)copy(start.node,finish.node+1,new_nstart);
-            else copy_backward(start.node,finish.node+1,new_nstart+old_num_nodes);
-        }
-        else{
-            size_type new_map_size=map_size+max(map_size,nodes_to_add)+2;
-            //配置一块空间，准备给新map用
-            map_pointer new_map=map_allocator::allocate(new_map_size);
-            new_nstart=new_map+(new_map_size-new_num_nodes)/2
-            +(add_at_front?nodes_to_add:0);
-            //把原map内容拷贝过来
-            copy(start.node,finish.node+1,new_nstart);
-            //释放原map
-            map_allocator::deallocate(map,map_size);
-            //设定新map的起始地址与大小
-            map=new_map;
-            map_size=new_map_size;
-        }    
-        //重新设定迭代器start和finish
-        start.set_node(new_nstart);
-        finish.set_node(new_nstart+old_num_nodes-1);
-    }
-
-    void pop_back(){
-        if(finish.cur!=finish.first){
-            //最后一个缓冲区有一个（或更多）元素
-            --finish.cur;//调整指针，相当于排除了最后元素
-            destroy(finish.cur);//将最后元素析构
+        if (map_size > 2 * new_num_nodes)
+        {
+            new_nstart = map + (map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
+            if (new_nstart < start.node)
+                copy(start.node, finish.node + 1, new_nstart);
+            else
+                copy_backward(start.node, finish.node + 1, new_nstart + old_num_nodes);
         }
         else
-        //最后缓冲区没有任何元素
-        pop_back_aux(); //这里将进行缓冲区释放工作
+        {
+            size_type new_map_size = map_size + max(map_size, nodes_to_add) + 2;
+            //配置一块空间，准备给新map用
+            map_pointer new_map = map_allocator::allocate(new_map_size);
+            new_nstart = new_map + (new_map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
+            //把原map内容拷贝过来
+            copy(start.node, finish.node + 1, new_nstart);
+            //释放原map
+            map_allocator::deallocate(map, map_size);
+            //设定新map的起始地址与大小
+            map = new_map;
+            map_size = new_map_size;
+        }
+        //重新设定迭代器start和finish
+        start.set_node(new_nstart);
+        finish.set_node(new_nstart + old_num_nodes - 1);
+    }
+
+    void pop_back()
+    {
+        if (finish.cur != finish.first)
+        {
+            //最后一个缓冲区有一个（或更多）元素
+            --finish.cur;        //调整指针，相当于排除了最后元素
+            destroy(finish.cur); //将最后元素析构
+        }
+        else
+            //最后缓冲区没有任何元素
+            pop_back_aux(); //这里将进行缓冲区释放工作
     }
 
     //只有当finish.cur==finish.first时才会被调用
-    template<class T,class Alloc,size_t BufSize>
-    void deque<T,Alloc,BufSize>::pop_back_aux(){
-        deallocate_node(finish.first);//释放最后一个缓冲区
-        finish.set_node(finish.node-1);//调整finish的状态，使指向上一个缓冲区的最后一个元素
-        finish.cur=finish.last-1;
-        destroy(finish.cur);//将该元素x析构
+    template <class T, class Alloc, size_t BufSize>
+    void deque<T, Alloc, BufSize>::pop_back_aux()
+    {
+        deallocate_node(finish.first);    //释放最后一个缓冲区
+        finish.set_node(finish.node - 1); //调整finish的状态，使指向上一个缓冲区的最后一个元素
+        finish.cur = finish.last - 1;
+        destroy(finish.cur); //将该元素x析构
     }
 
-    void pop_front(){
-        if(start.cur!=start.last-1){
+    void pop_front()
+    {
+        if (start.cur != start.last - 1)
+        {
             //第一个缓冲区有两个（或更多）元素
-            destroy(start.cur);//将最后元素析构
-            --start.cur;//调整指针，相当于排除了最后元素
+            destroy(start.cur); //将最后元素析构
+            --start.cur;        //调整指针，相当于排除了最后元素
         }
         else
-        //第一个缓冲区仅有一个元素
-        pop_front_aux(); //这里将进行缓冲区释放工作
+            //第一个缓冲区仅有一个元素
+            pop_front_aux(); //这里将进行缓冲区释放工作
     }
 
     //只有当start.cur==start.last-1时才会被调用
-    template<class T,class Alloc,size_t BufSize>
-    void deque<T,Alloc,BufSize>::pop_front_aux(){
-        destroy(start.cur);//将第一缓冲区第一个元素（也是唯一一个）析构
-        deallocate_node(start.first);//释放最后一个缓冲区
-        start.set_node(start.node+1);//调整start的状态，使指向上一个缓冲区的最后一个元素
-        start.cur=start.first;
+    template <class T, class Alloc, size_t BufSize>
+    void deque<T, Alloc, BufSize>::pop_front_aux()
+    {
+        destroy(start.cur);             //将第一缓冲区第一个元素（也是唯一一个）析构
+        deallocate_node(start.first);   //释放最后一个缓冲区
+        start.set_node(start.node + 1); //调整start的状态，使指向上一个缓冲区的最后一个元素
+        start.cur = start.first;
     }
 
     //注意，最终需要保留一个缓冲区，这是deque的策略，也是deque的初始状态
-    template<class T,class Alloc,size_t BufSize>
-    void deque<T,Alloc,BufSize>::clear(){
+    template <class T, class Alloc, size_t BufSize>
+    void deque<T, Alloc, BufSize>::clear()
+    {
         //以下针对头尾意外的每一个缓冲区（它们一定是满的）
-        for(map_pointer node=start.node+1;node<finish.node;++node){
-        //将缓冲区内所有元素析构，注意，用的是destroy()第二个版本
-        destroy(*node,*node+buffer_size());
-        //释放缓冲区内存
-        data_allocator::deallocate(*node,buffer_size());
+        for (map_pointer node = start.node + 1; node < finish.node; ++node)
+        {
+            //将缓冲区内所有元素析构，注意，用的是destroy()第二个版本
+            destroy(*node, *node + buffer_size());
+            //释放缓冲区内存
+            data_allocator::deallocate(*node, buffer_size());
         }
 
-        if(start.node!=finish.node){//至少有头尾两个缓冲区
-        destroy(start.cur,start.last);
-        destroy(finish.first,finish.cur);
-        //以下释放尾缓冲区，头缓冲区保留
-        data_allocator::deallocate(finish.first,buffer_size());
+        if (start.node != finish.node)
+        { //至少有头尾两个缓冲区
+            destroy(start.cur, start.last);
+            destroy(finish.first, finish.cur);
+            //以下释放尾缓冲区，头缓冲区保留
+            data_allocator::deallocate(finish.first, buffer_size());
         }
-        else//只有一个缓冲区
-        destroy(start.cur,finish.cur);//将此唯一缓冲区内的所有元素析构
+        else                                //只有一个缓冲区
+            destroy(start.cur, finish.cur); //将此唯一缓冲区内的所有元素析构
         //注意，并不释放缓冲区空间，这唯一的缓冲区将保留
-        finish=start;//调整状态
+        finish = start; //调整状态
     }
 
     //清除pos所指的元素，pos为清除点
-    iterator erase(iterator pos){
-        iterator next=pos;
+    iterator erase(iterator pos)
+    {
+        iterator next = pos;
         ++next;
-        difference_type index=pos-start;//清除点之前的元素个数
-        if(index<(size()>>1)){          //如果清除点之前的元素比较少
-        copy_backward(start,pos,next);  //就移动清除点之前的元素
-        pop_front();                    //移动完毕，最前一个元素冗余，弃之
+        difference_type index = pos - start; //清除点之前的元素个数
+        if (index < (size() >> 1))
+        {                                    //如果清除点之前的元素比较少
+            copy_backward(start, pos, next); //就移动清除点之前的元素
+            pop_front();                     //移动完毕，最前一个元素冗余，弃之
         }
-        else{                           //清除点之后的元素较少
-        copy(next,finish,pos);          //移动清除点后的元素
-        pop_back();                     //移动完毕，最后一个元素冗余，弃之
+        else
+        {                            //清除点之后的元素较少
+            copy(next, finish, pos); //移动清除点后的元素
+            pop_back();              //移动完毕，最后一个元素冗余，弃之
         }
-        return start+index;
+        return start + index;
     }
 
     //清除[first,last)区间所有元素
-    template
+    template <class T, class Alloc, size_t BufSize>
+    deque<T,Alloc,BufSize>::iterator
+    deque<T, Alloc, BufSize>::erase(iterator first, iterator last)
+    {
+        if (first == start && last == finish)
+        {            //如果清楚区间就是整个deque
+            clear(); //直接调用clear()即可
+            return finish;
+        }
+        else
+        {
+            difference_type n = last - first;             //清除区间的长度
+            difference_type elems_before = first - start; //清除区间前方的元素个数
+            if (elems_before < (size() - n) / 2)
+            {                                      //如果前方的元素比较少,
+                copy_backward(start, first, last); //向后移动前方元素(覆盖清除区间)
+                iterator new_start = start + n;    //标记deque的新起点
+                destroy(start, new_start);         //移动完毕,将冗余的元素析构
+                //以下将冗余的缓冲区释放
+                for (map_pointer cur = start.node; cur < new_start.node; ++cur)
+                    data_allocator::deallocate(*cur, buffer_size());
+                start = new_start; //设定deque的新起点
+            }
+            else
+            {                                     //如果清除区间后方的元素比较少
+                copy(last, finish, first);        //向前移动后方元素(覆盖清除区间)
+                iterator new_finish = finish - n; //标记deque的新尾点
+                destroy(new_finish, finish);      //移动完毕,将冗余的元素析构
+                //以下将冗余的缓冲区释放
+                for (map_pointer cur = new_finish.node + 1; cur <= finish.node; ++cur)
+                    data_allocator::deallocate(*cur, buffer_size());
+                finish = new_finish; //设定deque的新尾点
+            }
+            return start + elems_before;
+        }
+    }
+
+    //在position处插入一个元素,其值为x
+    iterator insert(iterator position, const value_type &x)
+    {
+        if (position.cur == start.cur)
+        { //如果插入点是deque的最前端
+            push_front(x);//交给push_front去做
+            return start;
+        }
+        else if(position.cur==finish.cur){//如果插入点在deque最尾端
+        push_back(x);
+        iterator tmp=finish;
+        --tmp;
+        return tmp;
+        }
+        else{
+            return insert_aux(position,x);      //交给insert_aux去做
+        }
+    }
+
+    template<class T,class Alloc,size_t BufSize>
+    typename deque<T,Alloc,BufSize>::iterator
+    deque<T,Alloc,BufSize>::insert_aux(iterator pos,const value_type x){
+        difference_type index=pos-start;            //插入点之前的元素个数
+        value_type x_copy=x;                        
+        if(index<size()/2){                         //如果插入点之前的元素个数比较少
+        push_front(front());                        //在最前端加入与第一元素同值的元素
+        iterator front1 = start;                    //以下标示记号,然后进行元素移动
+        ++front1;
+        iterator front2 = front1;
+        ++front2;
+        pos=start+index;
+        iterator pos1=pos;
+        pos1++;
+        copy(front2,pos1,front1);                   //元素移动
+        }
+        else{                                       //插入点之后的元素个数比较少
+        push_back(back());                          //在最尾端加入与最后元素同值的元素
+        iterator back1=finish;                      //以下标示记号,然后进行元素移动
+        --back1;
+        iterator back2 = back1;
+        --back2;
+        pos=start+index;
+        copy_backward(pos,back2,back2);             //元素移动
+        }
+        *pos=x_copy;//在插入点上设定新值
+        return pos;
+    }
 };
