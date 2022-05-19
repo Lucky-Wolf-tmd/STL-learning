@@ -51,7 +51,7 @@ inline void __push_heap_aux(RandomAccessIterator first, RandomAccessIterator las
 {
     __push_heap(first, Distance((last - fist) - 1), Distance(0), T(*(last - 1)));
     //以上根据implicit representation heap的结构特性：新值必须置于底部容器最尾端
-    //此即第一个洞号：（last- first）-1）
+    //此即第一个洞号：（last- first）-1
 }
 
 //以下这组push_back()不允许指定"大小比较标准"
