@@ -9,6 +9,10 @@
         "initializer_list": "cpp",
         "iostream": "cpp",
         "*.tcc": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "atomic": "cpp",
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp"
     }
 }

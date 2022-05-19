@@ -127,4 +127,34 @@ void __adjust_heap(RandomoAccessIterator first,Distance holeIndex,
 }
 
 //以下这个sort_heap算法不允许指定"大小比较标准"
-template<class 
+template<class RandomAccessIterator>
+void sort_heap(RandomAccessIterator first,RandomAccessIterator last){
+    /*以下，每执行一次pop_heap(),极值(在STL中为极大值)即被放在尾端
+    扣除尾端再执行一次pop_heap()，次极值又被放在新尾端，一直下去，最后得到排序结果
+    */
+   while(last-first>1)
+   pop_heap(first,last--);//每执行一次pop_heap(),操作范围缩一格
+}
+
+//将[first,last)排列为一个heap
+template<class RandomAccessIterator,class T,class Distance>
+void make_heap(RandomAccessIterator first,RandomAccessIterator last,T*,Distance*){
+    __make_heap(first,last,value_type(first),distance_type(first));
+}
+
+//以下这组make_heap()不允许指定大小比较标准
+template<class RandomAccessIterator,class T, class Distance>
+void __make_heap(RandomAccessIterator first,RandomAccessIterator last,T*,Distance*){
+    if(last-first<2)return;//如果长度为0或1，不必排序
+    Distance len=last-first;
+    //找出第一个需要重排的子树头部，以parent标出，由于任何叶子节点都不需要执行percolate down,所以以下所有计算，
+    //以parent命名不佳，宜为holeIndex
+    Distance holeIndex=(len-2)/2;
+
+    while(true){
+        //重排以holeIndex为首的子树，len是为了让__adjust_heap()判断操作范围
+        __adjust_heap(first,holeIndex,len,T(*(first+holeIndex)))
+        if(holeIndex==0)return ;//走完根节点，就结束
+        holeIndex--;            //(已重排的子树的)头部向前一个节点
+    }
+}
