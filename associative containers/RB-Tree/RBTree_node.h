@@ -1,3 +1,4 @@
+#include<stddef.h>
 typedef bool __rb_tree_color_type;
 const __rb_tree_color_type __rb_tree_red = false;
 const __rb_tree_color_type __rb_tree_black=true;
@@ -27,4 +28,4 @@ struct __rb_tree_node:public __rb_tree_node_base
 {
     typedef __rb_tree_node<Value>* link_type;
     Value value_field;//节点值
-}
+};
