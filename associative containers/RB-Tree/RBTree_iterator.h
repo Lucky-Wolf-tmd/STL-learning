@@ -1,4 +1,5 @@
 #include "RBTree_node.h"
+struct bidirectional_iterator_tag{};
 struct __rb_tree_base_iterator
 {
     typedef __rb_tree_node_base::base_ptr base_ptr;
